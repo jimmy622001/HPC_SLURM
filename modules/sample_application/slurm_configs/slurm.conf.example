@@ -1,0 +1,75 @@
+# Example slurm.conf file for AWS HPC Cluster
+# This is for reference only - ParallelCluster manages the actual configuration
+
+ClusterName=hpc-slurm-cluster
+ControlMachine=ip-10-0-16-100 # This would be the head node hostname
+#ControlAddr=
+
+# AUTHENTICATION
+SlurmctldPort=6817
+SlurmdPort=6818
+AuthType=auth/munge
+#JobCredentialPrivateKey=
+#JobCredentialPublicCertificate=
+StateSaveLocation=/var/spool/slurm/ctld
+SlurmdSpoolDir=/var/spool/slurm/d
+SwitchType=switch/none
+MpiDefault=pmix
+ReturnToService=1
+SchedulerType=sched/backfill
+SelectType=select/cons_tres
+SelectTypeParameters=CR_Core
+
+# TIMERS
+SlurmctldTimeout=300
+SlurmdTimeout=300
+InactiveLimit=0
+MinJobAge=300
+KillWait=30
+Waittime=0
+
+# SCHEDULING
+SchedulerType=sched/backfill
+#SchedulerAuth=
+#SchedulerPort=
+#SchedulerRootFilter=
+FastSchedule=1
+#PriorityType=priority/multifactor
+#PriorityDecayHalfLife=14-0
+#PriorityUsageResetPeriod=14-0
+#PriorityMaxAge=1-0
+#PriorityWeightFairshare=100000
+#PriorityWeightAge=1000
+#PriorityWeightPartition=10000
+#PriorityWeightJobSize=1000
+#PriorityWeightQOS=10000
+ProctrackType=proctrack/cgroup
+#JobContainerType=job_container/none
+GresTypes=gpu
+
+# LOGGING
+SlurmctldDebug=info
+SlurmctldLogFile=/var/log/slurm/slurmctld.log
+SlurmdDebug=info
+SlurmdLogFile=/var/log/slurm/slurmd.log
+JobCompType=jobcomp/none
+
+# ACCOUNTING
+AccountingStorageType=accounting_storage/filetxt
+AccountingStorageLoc=/var/log/slurm/accounting
+#JobAcctGatherType=jobacct_gather/none
+#JobAcctGatherFrequency=30
+
+# COMPUTE NODES
+# In AWS ParallelCluster, nodes are dynamically added and removed
+NodeName=ip-10-0-16-[101-110] CPUs=4 RealMemory=7000 State=UNKNOWN
+NodeName=ip-10-0-16-[111-120] CPUs=8 RealMemory=15000 State=UNKNOWN
+NodeName=ip-10-0-16-[121-130] CPUs=36 RealMemory=70000 State=UNKNOWN
+
+# PARTITIONS
+PartitionName=compute Nodes=ip-10-0-16-[101-130] Default=YES MaxTime=INFINITE State=UP DefMemPerCPU=1800
+PartitionName=highpriority Nodes=ip-10-0-16-[121-130] Default=NO MaxTime=12:00:00 State=UP DefMemPerCPU=2000 Priority=10000
+
+# GPU Configuration (if nodes have GPUs)
+# GresTypes=gpu
+# NodeName=ip-10-0-16-[121-130] Gres=gpu:4
