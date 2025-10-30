@@ -15,6 +15,16 @@ variable "head_node_ip" {
   type        = string
 }
 
+variable "head_node_id" {
+  description = "Instance ID of the cluster head node for SSM access"
+  type        = string
+}
+
+variable "aws_region" {
+  description = "AWS region where resources are deployed"
+  type        = string
+}
+
 variable "shared_storage_mount" {
   description = "Mount point for shared storage on cluster nodes"
   type        = string

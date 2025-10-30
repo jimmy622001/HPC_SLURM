@@ -109,19 +109,76 @@ resource "aws_route_table_association" "private" {
   route_table_id = aws_route_table.private_rt.id
 }
 
-# Create bastion host security group
-resource "aws_security_group" "bastion_sg" {
-  count       = var.enable_bastion_host ? 1 : 0
-  name        = "${var.project_name}-bastion-sg"
-  description = "Security group for bastion host"
+
+
+# SSM resources
+# Create VPC endpoints for SSM
+resource "aws_vpc_endpoint" "ssm" {
+  vpc_id              = aws_vpc.hpc_vpc.id
+  service_name        = data.aws_vpc_endpoint_service.ssm.service_name
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  subnet_ids          = aws_subnet.private.*.id
+  security_group_ids  = [aws_security_group.ssm_endpoint_sg.id]
+
+  tags = {
+    Name = "${var.project_name}-ssm-endpoint"
+  }
+}
+
+data "aws_region" "current" {}
+
+# Data sources for VPC endpoint services
+data "aws_vpc_endpoint_service" "ssm" {
+  service = "ssm"
+}
+
+data "aws_vpc_endpoint_service" "ec2messages" {
+  service = "ec2messages"
+}
+
+data "aws_vpc_endpoint_service" "ssmmessages" {
+  service = "ssmmessages"
+}
+
+resource "aws_vpc_endpoint" "ec2messages" {
+  vpc_id              = aws_vpc.hpc_vpc.id
+  service_name        = data.aws_vpc_endpoint_service.ec2messages.service_name
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  subnet_ids          = aws_subnet.private.*.id
+  security_group_ids  = [aws_security_group.ssm_endpoint_sg.id]
+
+  tags = {
+    Name = "${var.project_name}-ec2messages-endpoint"
+  }
+}
+
+resource "aws_vpc_endpoint" "ssmmessages" {
+  vpc_id              = aws_vpc.hpc_vpc.id
+  service_name        = data.aws_vpc_endpoint_service.ssmmessages.service_name
+  vpc_endpoint_type   = "Interface"
+  private_dns_enabled = true
+  subnet_ids          = aws_subnet.private.*.id
+  security_group_ids  = [aws_security_group.ssm_endpoint_sg.id]
+
+  tags = {
+    Name = "${var.project_name}-ssmmessages-endpoint"
+  }
+}
+
+# Security group for SSM endpoints
+resource "aws_security_group" "ssm_endpoint_sg" {
+  name        = "${var.project_name}-ssm-endpoints-sg"
+  description = "Security group for SSM endpoints"
   vpc_id      = aws_vpc.hpc_vpc.id
 
   ingress {
-    from_port   = 22
-    to_port     = 22
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "Allow SSH from Internet"
+    cidr_blocks = [var.vpc_cidr]
+    description = "Allow HTTPS from VPC"
   }
 
   egress {
@@ -133,38 +190,45 @@ resource "aws_security_group" "bastion_sg" {
   }
 
   tags = {
-    Name = "${var.project_name}-bastion-sg"
+    Name = "${var.project_name}-ssm-endpoints-sg"
   }
 }
 
-# Create bastion host
-data "aws_ami" "amazon_linux_2" {
-  most_recent = true
-  owners      = ["amazon"]
+# IAM role for SSM instance profile
+resource "aws_iam_role" "ssm_role" {
+  count = 1
+  name  = "${var.project_name}-ssm-role"
 
-  filter {
-    name   = "name"
-    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
-  }
-}
-
-resource "aws_instance" "bastion" {
-  count                       = var.enable_bastion_host ? 1 : 0
-  ami                         = data.aws_ami.amazon_linux_2.id
-  instance_type               = var.bastion_instance_type
-  subnet_id                   = aws_subnet.public[0].id
-  vpc_security_group_ids      = [aws_security_group.bastion_sg[0].id]
-  key_name                    = var.bastion_key_name
-  associate_public_ip_address = true
-
-  root_block_device {
-    volume_size = 20
-    volume_type = "gp3"
-  }
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        }
+      }
+    ]
+  })
 
   tags = {
-    Name = "${var.project_name}-bastion"
+    Name = "${var.project_name}-ssm-role"
   }
+}
+
+# Attach SSM policies to the role
+resource "aws_iam_role_policy_attachment" "ssm_policy" {
+  count      = 1
+  role       = aws_iam_role.ssm_role[0].name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+}
+
+# Create instance profile for SSM
+resource "aws_iam_instance_profile" "ssm_instance_profile" {
+  count = 1
+  name  = "${var.project_name}-ssm-instance-profile"
+  role  = aws_iam_role.ssm_role[0].name
 }
 
 # Create head node security group
@@ -173,13 +237,6 @@ resource "aws_security_group" "head_node_sg" {
   description = "Security group for head node"
   vpc_id      = aws_vpc.hpc_vpc.id
 
-  ingress {
-    from_port       = 22
-    to_port         = 22
-    protocol        = "tcp"
-    security_groups = var.enable_bastion_host ? [aws_security_group.bastion_sg[0].id] : []
-    description     = "Allow SSH from bastion host"
-  }
 
   ingress {
     from_port   = 0

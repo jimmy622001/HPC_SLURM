@@ -8,8 +8,10 @@ Before you begin, ensure you have:
 
 - AWS account with appropriate permissions
 - AWS CLI installed and configured
+- AWS CLI Session Manager plugin installed for SSM connectivity
+  - [Installation instructions](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html)
 - Terraform >= 1.0.0 installed
-- SSH key pair for accessing cluster nodes
+- SSH key pair (only needed internally for some cluster operations)
 
 ## Deployment Steps
 
@@ -29,10 +31,11 @@ Before you begin, ensure you have:
 3. Edit the `terraform.tfvars` file to set your configuration values:
    - Set your AWS region
    - Configure the network CIDR ranges
-   - Set your SSH key name
+   - Set your SSH key name (still needed for some internal cluster operations)
    - Configure cluster parameters
    - Set a secure Grafana admin password
-   - Restrict SSH and monitoring access to your IP or network
+   - Restrict monitoring access to your IP or network
+   - All connectivity uses SSM (AWS Systems Manager)
 
 ### 2. Initialize and Apply Terraform
 
@@ -57,21 +60,25 @@ Before you begin, ensure you have:
    ```
 
 5. Note the outputs for accessing your cluster:
-   - Bastion host IP
-   - Head node IP
+   - Head node ID (for SSM access)
+   - Head node private IP
    - Grafana monitoring URL
 
 ### 3. Accessing the SLURM Cluster
 
-1. SSH to the bastion host:
+#### Accessing via AWS Systems Manager (SSM)
+
+1. Using the AWS CLI:
    ```bash
-   ssh -i /path/to/your/key.pem ec2-user@$(terraform output -raw bastion_public_ip)
+   # Start an SSM session to the head node
+   aws ssm start-session --target $(terraform output -raw head_node_id) --region $(terraform output -raw aws_region)
    ```
 
-2. From the bastion, SSH to the head node:
-   ```bash
-   ssh -i ~/.ssh/id_rsa ec2-user@$(terraform output -raw head_node_ip)
-   ```
+2. Alternatively, access through the AWS Console:
+   - Go to the EC2 console
+   - Select the head node instance
+   - Click "Connect" and choose the "Session Manager" tab
+   - Click "Connect"
 
 3. Check the SLURM cluster status:
    ```bash
@@ -181,11 +188,18 @@ terraform destroy
 
 ### Common Issues
 
-1. **Unable to connect to the bastion host**
-   - Check your security group settings in terraform.tfvars
-   - Make sure your IP address hasn't changed
+1. **Unable to connect via SSM**
+   - Make sure you've installed the AWS CLI Session Manager plugin
+     ```bash
+     # Verify installation
+     session-manager-plugin --version
+     ```
+   - Ensure your AWS CLI is properly configured with appropriate permissions
+   - Verify that the VPC endpoints for SSM are properly configured
+   - Check that the instance has the necessary IAM role and permissions
+   - Try connecting through the AWS Console instead of CLI as a test
 
-2. **Jobs stuck in pending state**
+3. **Jobs stuck in pending state**
    - Check node availability with `sinfo`
    - Check if nodes are being provisioned (may take 5-10 minutes)
    - Review jobs requirements with `scontrol show job <jobid>`

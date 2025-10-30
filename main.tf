@@ -25,22 +25,19 @@ resource "random_id" "bucket_suffix" {
 module "infrastructure" {
   source = "./modules/infrastructure"
 
-  vpc_cidr           = var.vpc_cidr
-  project_name       = var.project_name
-  availability_zones = var.availability_zones
-
-  # Fixed variable references to use existing variables
-  private_subnet_cidrs = var.private_subnet_cidrs
+  project_name         = var.project_name
+  availability_zones   = var.availability_zones
+  vpc_cidr             = var.vpc_cidr
   public_subnet_cidrs  = var.public_subnet_cidrs
-  bastion_key_name     = var.ssh_key_name # Using the ssh_key_name variable
-}
+  private_subnet_cidrs = var.private_subnet_cidrs
 
+}
 # SLURM Cluster Module
 module "cluster" {
-  source = "./modules/cluster"
+  source       = "./modules/cluster"
+  project_name = var.project_name
 
   # Required arguments
-  project_name           = var.project_name
   cluster_name           = var.cluster_name
   head_node_sg_id        = module.infrastructure.head_node_security_group_id
   compute_node_sg_id     = module.infrastructure.compute_node_security_group_id
@@ -54,6 +51,9 @@ module "cluster" {
   max_compute_nodes      = var.max_compute_nodes
   enable_spot_instances  = var.enable_spot_instances
   enable_dashboard       = var.enable_dashboard
+
+  # Add SSM instance profile for cluster nodes
+  iam_instance_profile = module.infrastructure.ssm_instance_profile_name
 }
 
 # Sample Application Module
@@ -64,6 +64,8 @@ module "sample_application" {
   project_name         = var.project_name
   cluster_name         = module.cluster.cluster_name
   head_node_ip         = module.cluster.head_node_private_ip
+  head_node_id         = module.cluster.head_node_id
+  aws_region           = var.aws_region
   shared_storage_mount = module.cluster.shared_storage_mount
   ssh_key_name         = var.ssh_key_name
   apps_s3_bucket       = module.cluster.apps_s3_bucket
@@ -85,16 +87,8 @@ module "monitoring" {
   head_node_private_ip           = module.cluster.head_node_private_ip
   head_node_id                   = module.cluster.head_node_id
 
-  # Security configuration
-  bastion_host             = module.infrastructure.bastion_public_ip
-  ssh_key_path             = var.ssh_key_path
-  bastion_user             = "ec2-user"
-  bastion_private_key_path = var.ssh_key_path
-
   # Grafana configuration
   grafana_admin_password = var.grafana_admin_password
-
-
 
   # Tags
   tags = local.tags

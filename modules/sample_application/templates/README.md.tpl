@@ -10,8 +10,19 @@ This directory contains sample applications that demonstrate how to use the SLUR
 
 ## Setup Instructions
 
-1. SSH to the head node:
+1. Access the head node:
+
+   **Primary Method: Using AWS Systems Manager (SSM)**
    ```bash
+   # Via AWS CLI
+   aws ssm start-session --target ${head_node_id} --region ${aws_region}
+
+   # Or connect using the AWS Console -> EC2 -> Connect -> Session Manager
+   ```
+
+   **Alternative Method: Using SSH (only if bastion host is enabled)**
+   ```bash
+   # First SSH to the bastion host, then to the head node
    ssh ec2-user@${head_node_ip}
    ```
 

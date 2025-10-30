@@ -98,3 +98,9 @@ variable "enable_dashboard" {
   type        = bool
   default     = true
 }
+
+variable "iam_instance_profile" {
+  description = "IAM instance profile name for cluster nodes"
+  type        = string
+  default     = ""
+}

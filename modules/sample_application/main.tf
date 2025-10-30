@@ -93,6 +93,8 @@ data "template_file" "readme" {
   vars = {
     cluster_name         = var.cluster_name
     head_node_ip         = var.head_node_ip
+    head_node_id         = var.head_node_id
+    aws_region           = var.aws_region
     shared_storage_mount = var.shared_storage_mount
     app_bucket           = aws_s3_bucket.app_bucket.id
   }

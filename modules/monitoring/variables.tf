@@ -48,25 +48,12 @@ variable "head_node_id" {
   type        = string
 }
 
-variable "bastion_host" {
-  description = "Bastion host public IP or DNS"
-  type        = string
-}
+# All connectivity is now via AWS Systems Manager (SSM)
 
-variable "ssh_key_path" {
-  description = "Path to SSH private key for node access"
-  type        = string
-}
-
-variable "bastion_user" {
-  description = "Username for bastion host"
-  type        = string
-  default     = "ec2-user"
-}
-
-variable "bastion_private_key_path" {
-  description = "Path to private key for bastion host"
-  type        = string
+variable "use_ssm" {
+  description = "Always uses SSM for connectivity - kept for backward compatibility"
+  type        = bool
+  default     = true
 }
 
 variable "grafana_admin_password" {

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project provides a comprehensive proof of concept for deploying and managing High-Performance Computing (HPC) workloads on AWS using SLURM as the job scheduler. It demonstrates key capabilities required for HPC administration in cloud environments, including:
+This project provides a comprehensive proof of concept for deploying and managing High-Performance Computing (HPC) workloads on AWS using SLURM as the job scheduler. It uses AWS Systems Manager (SSM) for secure, bastion-free connectivity to instances. The project demonstrates key capabilities required for HPC administration in cloud environments, including:
 
 - Setting up SLURM clusters on AWS with AWS ParallelCluster
 - Job scheduling and resource optimization
@@ -16,7 +16,7 @@ The project is organized into four main modules:
 
 1. **Infrastructure Module**
    - VPC with public and private subnets
-   - Bastion host for secure access
+   - AWS Systems Manager (SSM) endpoints for secure connectivity
    - Security groups and network configurations
    - Shared storage options (EFS, FSx for Lustre)
 
@@ -67,7 +67,8 @@ The project is organized into four main modules:
 - AWS Account
 - Terraform >= 1.0.0
 - AWS CLI configured with appropriate permissions
-- SSH key for accessing cluster nodes
+- AWS CLI with Session Manager plugin for SSM connectivity
+- SSH key (only needed for some internal operations)
 
 ## Getting Started
 

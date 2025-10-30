@@ -3,6 +3,8 @@
  * 
  * This module sets up Prometheus and Grafana for monitoring the HPC cluster,
  * with dashboards for SLURM metrics, job statistics, and system performance.
+ * 
+ * Updated to support both bastion-based SSH connectivity and SSM-based connectivity.
  */
 
 locals {

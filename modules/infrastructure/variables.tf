@@ -31,23 +31,6 @@ variable "enable_nat_gateway" {
   default     = true
 }
 
-variable "enable_bastion_host" {
-  description = "Whether to deploy a bastion host for SSH access"
-  type        = bool
-  default     = true
-}
-
-variable "bastion_instance_type" {
-  description = "Instance type for bastion host"
-  type        = string
-  default     = "t3.micro"
-}
-
-variable "bastion_key_name" {
-  description = "Name of the SSH key pair to use for bastion host"
-  type        = string
-}
-
 variable "enable_shared_storage" {
   description = "Whether to deploy shared storage (EFS or FSx for Lustre)"
   type        = bool
@@ -81,3 +64,4 @@ variable "fsx_lustre_deployment_type" {
     error_message = "FSx Lustre deployment type must be one of: SCRATCH_1, SCRATCH_2, PERSISTENT_1, PERSISTENT_2."
   }
 }
+

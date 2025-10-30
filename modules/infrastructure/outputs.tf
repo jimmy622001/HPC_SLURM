@@ -15,9 +15,14 @@ output "private_subnet_ids" {
   value       = aws_subnet.private[*].id
 }
 
-output "bastion_public_ip" {
-  description = "Public IP of the bastion host"
-  value       = var.enable_bastion_host ? aws_instance.bastion[0].public_ip : null
+output "ssm_instance_profile_name" {
+  description = "Name of the SSM instance profile"
+  value       = aws_iam_instance_profile.ssm_instance_profile[0].name
+}
+
+output "ssm_role_arn" {
+  description = "ARN of the SSM role"
+  value       = aws_iam_role.ssm_role[0].arn
 }
 
 output "head_node_sg_id" {
@@ -57,10 +62,6 @@ output "nat_gateway_ip" {
   value       = var.enable_nat_gateway ? aws_nat_gateway.nat_gw[0].public_ip : null
 }
 
-output "enable_bastion_host" {
-  description = "Whether bastion host is enabled"
-  value       = var.enable_bastion_host
-}
 
 output "head_node_security_group_id" {
   description = "ID of the security group for the head node"
@@ -75,9 +76,4 @@ output "compute_node_security_group_id" {
 output "efs_id" {
   description = "ID of the EFS filesystem"
   value       = aws_efs_file_system.shared_storage.id
-}
-
-output "bastion_security_group_id" {
-  description = "ID of the bastion security group"
-  value       = var.enable_bastion_host ? aws_security_group.bastion_sg[0].id : null
 }

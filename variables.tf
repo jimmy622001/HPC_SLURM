@@ -36,10 +36,7 @@ variable "private_subnet_cidrs" {
   default     = ["10.0.2.0/24", "10.0.3.0/24"]
 }
 
-variable "bastion_key_name" {
-  description = "Name of the SSH key pair to use for bastion host (must exist in AWS)"
-  type        = string
-}
+# No bastion host is used. All connectivity is via AWS Systems Manager (SSM)
 
 variable "availability_zones" {
   description = "Availability zones to use"
@@ -48,7 +45,7 @@ variable "availability_zones" {
 }
 
 variable "allowed_ssh_cidr" {
-  description = "CIDR blocks allowed for SSH access (e.g., [\"YOUR_IP_ADDRESS/32\"])"
+  description = "CIDR blocks allowed for direct SSH access to nodes if needed (e.g., [\"YOUR_IP_ADDRESS/32\"]) - Primarily for monitoring access"
   type        = list(string)
 }
 
@@ -158,8 +155,9 @@ variable "enable_nat_gateway" {
   default     = false
 }
 
+# Only SSM is used for node access - this variable is kept only for backward compatibility
 variable "enable_bastion_host" {
-  description = "Whether to enable bastion host"
+  description = "[DEPRECATED] - All connectivity is now via SSM"
   type        = bool
   default     = false
 }

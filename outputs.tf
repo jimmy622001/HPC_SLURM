@@ -14,10 +14,11 @@ output "private_subnet_ids" {
   value       = module.infrastructure.private_subnet_ids
 }
 
-output "bastion_public_ip" {
-  description = "Public IP address of the bastion host"
-  value       = module.infrastructure.bastion_public_ip
-}
+# Removed bastion host output since we're using SSM
+# output "bastion_public_ip" {
+#   description = "Public IP address of the bastion host"
+#   value       = module.infrastructure.bastion_public_ip
+# }
 
 # Cluster Outputs
 output "cluster_name" {

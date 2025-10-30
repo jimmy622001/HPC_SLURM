@@ -14,18 +14,17 @@ The infrastructure module creates the foundational AWS resources:
 
 - **VPC**: A dedicated VPC with CIDR block matching the configured value
 - **Subnets**:
-  - Public subnets for bastion host and public-facing services
+  - Public subnets for public-facing services like monitoring dashboards
   - Private subnets for HPC cluster nodes
 - **Security Groups**:
-  - Bastion security group
   - Head node security group
   - Compute node security group
   - Shared storage security group
   - Monitoring security group
-- **Bastion Host**:
-  - Small instance (t3.micro)
-  - Public IP and SSH access
-  - Used as jump box to access private resources
+- **Connectivity**:
+  - AWS Systems Manager (SSM) for secure, bastion-free access
+  - SSM endpoints in private subnets
+  - No need for public-facing bastion hosts
 
 ### Cluster Module
 
@@ -87,8 +86,7 @@ The monitoring module provides comprehensive observability:
 ## Network Flow
 
 1. **User Access Flow**:
-   - User connects to bastion host via SSH
-   - From bastion, user connects to head node
+   - User connects to head node via AWS Systems Manager (SSM)
    - User submits jobs to SLURM queue
 
 2. **Job Execution Flow**:
@@ -109,7 +107,8 @@ The monitoring module provides comprehensive observability:
 - **Network Security**:
   - Private subnets for compute resources
   - Security groups limit traffic flow
-  - SSH access only through bastion host
+  - Secure access exclusively via AWS Systems Manager (SSM)
+  - No SSH exposure to the internet
 
 - **IAM Security**:
   - Least privilege permissions

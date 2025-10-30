@@ -40,6 +40,7 @@ resource "aws_instance" "head_node" {
   subnet_id              = var.private_subnet_ids[0]
   vpc_security_group_ids = [var.head_node_sg_id]
   key_name               = var.ssh_key_name
+  iam_instance_profile   = var.iam_instance_profile != "" ? var.iam_instance_profile : null
 
   tags = {
     Name = "${var.cluster_name}-head-node"
@@ -66,6 +67,13 @@ resource "aws_launch_template" "compute_node_template" {
   image_id      = "ami-0c55b159cbfafe1f0" # Use a valid AMI ID or data source
   instance_type = "t3.medium"
   key_name      = var.ssh_key_name
+
+  dynamic "iam_instance_profile" {
+    for_each = var.iam_instance_profile != "" ? [var.iam_instance_profile] : []
+    content {
+      name = iam_instance_profile.value
+    }
+  }
 
   network_interfaces {
     associate_public_ip_address = false
