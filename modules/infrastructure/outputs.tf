@@ -74,7 +74,7 @@ output "compute_node_security_group_id" {
 
 output "efs_id" {
   description = "ID of the EFS filesystem"
-  value       = aws_efs_file_system.shared_storage.id
+  value       = var.enable_shared_storage && var.shared_storage_type == "efs" ? aws_efs_file_system.efs[0].id : null
 }
 
 output "bastion_security_group_id" {

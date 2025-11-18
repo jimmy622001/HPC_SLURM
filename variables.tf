@@ -177,6 +177,13 @@ variable "prometheus_port" {
   type        = number
 }
 
+# ACM certificate
+variable "acm_certificate_arn" {
+  description = "ARN of ACM certificate for HTTPS"
+  type        = string
+  default     = ""
+}
+
 # Route53 variables
 variable "create_route53_record" {
   description = "Whether to create Route53 record"

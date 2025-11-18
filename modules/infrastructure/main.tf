@@ -330,12 +330,4 @@ resource "aws_fsx_lustre_file_system" "fsx" {
     Name = "${var.project_name}-fsx-lustre"
   }
 }
-resource "aws_efs_file_system" "shared_storage" {
-  creation_token = "${var.project_name}-efs"
-  encrypted      = true
-
-  tags = {
-    Name = "${var.project_name}-efs"
-  }
-}
-
+# Duplicate EFS resource removed

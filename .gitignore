@@ -43,3 +43,6 @@ terraform.rc
 # OS specific files
 .DS_Store
 Thumbs.db
+
+#codemie
+*.codemie*

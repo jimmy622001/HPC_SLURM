@@ -25,14 +25,21 @@ resource "random_id" "bucket_suffix" {
 module "infrastructure" {
   source = "./modules/infrastructure"
 
-  vpc_cidr           = var.vpc_cidr
-  project_name       = var.project_name
-  availability_zones = var.availability_zones
-
-  # Fixed variable references to use existing variables
+  vpc_cidr             = var.vpc_cidr
+  project_name         = var.project_name
+  availability_zones   = var.availability_zones
   private_subnet_cidrs = var.private_subnet_cidrs
   public_subnet_cidrs  = var.public_subnet_cidrs
-  bastion_key_name     = var.ssh_key_name # Using the ssh_key_name variable
+  bastion_key_name     = var.ssh_key_name
+
+  # Add missing parameters
+  enable_nat_gateway         = var.enable_nat_gateway
+  enable_bastion_host        = var.enable_bastion_host
+  bastion_instance_type      = var.bastion_instance_type
+  enable_shared_storage      = var.enable_shared_storage
+  shared_storage_type        = var.shared_storage_type
+  fsx_lustre_capacity        = var.fsx_lustre_capacity
+  fsx_lustre_deployment_type = var.fsx_lustre_deployment_type
 }
 
 # SLURM Cluster Module
@@ -40,20 +47,24 @@ module "cluster" {
   source = "./modules/cluster"
 
   # Required arguments
-  project_name           = var.project_name
-  cluster_name           = var.cluster_name
-  head_node_sg_id        = module.infrastructure.head_node_security_group_id
-  compute_node_sg_id     = module.infrastructure.compute_node_security_group_id
-  ssh_key_name           = var.ssh_key_name
-  shared_storage_id      = module.infrastructure.efs_id
-  shared_storage_type    = "efs"
-  vpc_id                 = module.infrastructure.vpc_id
-  private_subnet_ids     = module.infrastructure.private_subnet_ids
-  compute_instance_types = var.compute_instance_types
-  min_compute_nodes      = var.min_compute_nodes
-  max_compute_nodes      = var.max_compute_nodes
-  enable_spot_instances  = var.enable_spot_instances
-  enable_dashboard       = var.enable_dashboard
+  project_name            = var.project_name
+  cluster_name            = var.cluster_name
+  head_node_sg_id         = module.infrastructure.head_node_security_group_id
+  compute_node_sg_id      = module.infrastructure.compute_node_security_group_id
+  ssh_key_name            = var.ssh_key_name
+  shared_storage_id       = module.infrastructure.efs_id
+  shared_storage_type     = "efs"
+  vpc_id                  = module.infrastructure.vpc_id
+  private_subnet_ids      = module.infrastructure.private_subnet_ids
+  compute_instance_types  = var.compute_instance_types
+  min_compute_nodes       = var.min_compute_nodes
+  max_compute_nodes       = var.max_compute_nodes
+  enable_spot_instances   = var.enable_spot_instances
+  enable_dashboard        = var.enable_dashboard
+  enable_hyperthreading   = var.enable_hyperthreading
+  head_node_instance_type = var.head_node_instance_type
+  max_queue_size          = var.max_queue_size
+  placement_group         = var.placement_group
 }
 
 # Sample Application Module
@@ -67,6 +78,7 @@ module "sample_application" {
   shared_storage_mount = module.cluster.shared_storage_mount
   ssh_key_name         = var.ssh_key_name
   apps_s3_bucket       = module.cluster.apps_s3_bucket
+  enable_dashboard     = var.enable_dashboard
 }
 
 # Monitoring Module - Prometheus and Grafana
@@ -84,6 +96,12 @@ module "monitoring" {
   allowed_monitoring_cidr_blocks = var.allowed_monitoring_cidr
   head_node_private_ip           = module.cluster.head_node_private_ip
   head_node_id                   = module.cluster.head_node_id
+  acm_certificate_arn            = var.acm_certificate_arn
+  create_route53_record          = var.create_route53_record
+  dns_domain                     = var.dns_domain
+  route53_zone_id                = var.route53_zone_id
+  prometheus_port                = var.prometheus_port
+  dummy_certificate              = var.dummy_certificate
 
   # Security configuration
   bastion_host             = module.infrastructure.bastion_public_ip
@@ -93,8 +111,6 @@ module "monitoring" {
 
   # Grafana configuration
   grafana_admin_password = var.grafana_admin_password
-
-
 
   # Tags
   tags = local.tags
