@@ -61,7 +61,6 @@ variable "ssh_key_path" {
 variable "bastion_user" {
   description = "Username for bastion host"
   type        = string
-  default     = "ec2-user"
 }
 
 variable "bastion_private_key_path" {
@@ -78,7 +77,6 @@ variable "grafana_admin_password" {
 variable "dummy_certificate" {
   description = "Whether to use a self-signed dummy certificate for HTTPS"
   type        = bool
-  default     = true
 }
 
 variable "acm_certificate_arn" {
@@ -90,19 +88,16 @@ variable "acm_certificate_arn" {
 variable "create_route53_record" {
   description = "Whether to create Route53 record"
   type        = bool
-  default     = false
 }
 
 variable "route53_zone_id" {
   description = "Route53 zone ID"
   type        = string
-  default     = ""
 }
 
 variable "dns_domain" {
   description = "DNS domain for Route53 record"
   type        = string
-  default     = ""
 }
 
 variable "tags" {
@@ -112,5 +107,4 @@ variable "tags" {
 variable "prometheus_port" {
   description = "Port for Prometheus service"
   type        = number
-  default     = 9090
 }

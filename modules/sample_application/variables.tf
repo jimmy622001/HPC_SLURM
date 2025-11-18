@@ -32,5 +32,4 @@ variable "apps_s3_bucket" {
 variable "enable_dashboard" {
   description = "Whether to enable the dashboard feature"
   type        = bool
-  default     = true
 }

@@ -20,7 +20,7 @@ override.tf.json
 *_override.tf.json
 
 # Include tfvars.example files, which are used as templates
-!*.tfvars.example
+!*.tfvars.
 
 # Ignore CLI configuration files
 .terraformrc

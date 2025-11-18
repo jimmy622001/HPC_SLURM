@@ -43,37 +43,31 @@ variable "cluster_name" {
 variable "head_node_instance_type" {
   description = "Instance type for the head node"
   type        = string
-  default     = "c5.xlarge"
 }
 
 variable "compute_instance_types" {
   description = "Instance types for compute nodes (ordered by preference)"
   type        = list(string)
-  default     = ["c5.2xlarge", "c5.4xlarge", "c5.12xlarge"]
 }
 
 variable "max_queue_size" {
   description = "Maximum number of jobs in the queue"
   type        = number
-  default     = 100
 }
 
 variable "min_compute_nodes" {
   description = "Minimum number of compute nodes"
   type        = number
-  default     = 0
 }
 
 variable "max_compute_nodes" {
   description = "Maximum number of compute nodes"
   type        = number
-  default     = 10
 }
 
 variable "enable_spot_instances" {
   description = "Whether to use spot instances for compute nodes"
   type        = bool
-  default     = true
 }
 
 variable "ssh_key_name" {
@@ -84,17 +78,14 @@ variable "ssh_key_name" {
 variable "placement_group" {
   description = "Whether to use placement group for improved networking"
   type        = bool
-  default     = true
 }
 
 variable "enable_hyperthreading" {
   description = "Whether to enable hyperthreading on compute nodes"
   type        = bool
-  default     = true
 }
 
 variable "enable_dashboard" {
   description = "Whether to deploy CloudWatch dashboard for monitoring"
   type        = bool
-  default     = true
 }

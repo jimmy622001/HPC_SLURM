@@ -28,19 +28,16 @@ variable "availability_zones" {
 variable "enable_nat_gateway" {
   description = "Whether to enable NAT Gateway for private subnets"
   type        = bool
-  default     = true
 }
 
 variable "enable_bastion_host" {
   description = "Whether to deploy a bastion host for SSH access"
   type        = bool
-  default     = true
 }
 
 variable "bastion_instance_type" {
   description = "Instance type for bastion host"
   type        = string
-  default     = "t3.micro"
 }
 
 variable "bastion_key_name" {
@@ -51,13 +48,11 @@ variable "bastion_key_name" {
 variable "enable_shared_storage" {
   description = "Whether to deploy shared storage (EFS or FSx for Lustre)"
   type        = bool
-  default     = true
 }
 
 variable "shared_storage_type" {
   description = "Type of shared storage to deploy (efs or fsx_lustre)"
   type        = string
-  default     = "efs"
 
   validation {
     condition     = contains(["efs", "fsx_lustre"], var.shared_storage_type)
@@ -68,13 +63,11 @@ variable "shared_storage_type" {
 variable "fsx_lustre_capacity" {
   description = "Storage capacity for FSx Lustre in GB"
   type        = number
-  default     = 1200
 }
 
 variable "fsx_lustre_deployment_type" {
   description = "Deployment type for FSx Lustre"
   type        = string
-  default     = "SCRATCH_2"
 
   validation {
     condition     = contains(["SCRATCH_1", "SCRATCH_2", "PERSISTENT_1", "PERSISTENT_2"], var.fsx_lustre_deployment_type)
